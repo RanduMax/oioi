@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras - EcoMarket</title>
+    <link rel="stylesheet" href="carritoM.css"> <!-- Vincula el archivo CSS -->
+</head>
+<body>
+    <!-- Encabezado -->
+    <header>
+        <div class="logo">
+            <h1>EcoMarket</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="#productos">Productos</a></li>
+                <li><a href="#">Categorías</a></li>
+                <li><a href="carrito.html">Carrito</a></li>
+                <li><a href="contatos.html">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Carrito -->
+    <section class="cart-container">
+        <h2>Tu Carrito</h2>
+
+        <!-- Productos en el carrito -->
+        <div class="cart-items" id="cart-items">
+            <!-- Aquí se añadirán los productos dinámicamente -->
+        </div>
+
+        <!-- Resumen del carrito -->
+        <div class="cart-summary">
+            <h3>Resumen de la Compra</h3>
+            <p>Productos en el carrito: <span id="total-products">0</span></p>
+            <p>Total: <strong id="total-price">$0</strong></p>
+            <a href="paginadepaga.html">
+                <button class="checkout-btn">Proceder al Pago</button>
+            </a>
+        </div>
+    </section>
+
+    <!-- Pie de página -->
+    <footer>
+        <p>&copy; 2024 EcoMarket | Todos los derechos reservados</p>
+        <div class="social-links">
+            <a href="#">Facebook</a>
+            <a href="#">Instagram</a>
+            <a href="#">Twitter</a>
+        </div>
+    </footer>
+
+    <script>
+        // Función para añadir productos al carrito
+        function addToCart(name, price, image) {
+            // Crear un objeto del producto
+            const product = { name, price, image, quantity: 1 };
+
+            // Recuperar el carrito del localStorage
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            // Verificar si el producto ya existe en el carrito
+            const existingProduct = cart.find(item => item.name === name);
+
+            if (existingProduct) {
+                // Si el producto ya existe, solo incrementamos la cantidad
+                existingProduct.quantity += 1;
+            } else {
+                // Si el producto no existe, lo añadimos al carrito
+                cart.push(product);
+            }
+
+            // Actualizamos el carrito en el localStorage
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Actualizamos la vista del carrito
+            updateCart();
+        }
+
+        // Función para eliminar productos del carrito
+        function removeFromCart(name) {
+            // Recuperar el carrito del localStorage
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            // Eliminar el producto del carrito
+            cart = cart.filter(item => item.name !== name);
+
+            // Actualizamos el carrito en el localStorage
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Actualizamos la vista del carrito
+            updateCart();
+        }
+
+        // Función para actualizar el carrito en la interfaz de usuario
+        function updateCart() {
+            // Obtener el carrito desde localStorage
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            const cartItemsContainer = document.getElementById("cart-items");
+            const totalProductsElement = document.getElementById("total-products");
+            const totalPriceElement = document.getElementById("total-price");
+
+            // Limpiar el contenedor de productos
+            cartItemsContainer.innerHTML = '';
+
+            // Añadir los productos al carrito
+            let totalPrice = 0;
+            cart.forEach(product => {
+                totalPrice += product.price * product.quantity;
+
+                // Crear el HTML para cada producto en el carrito
+                const productHTML = `
+                    <div class="cart-item">
+                        <img src="${product.image}" alt="${product.name}" class="cart-item-img">
+                        <div class="cart-item-details">
+                            <h3>${product.name}</h3>
+                            <p>Precio: $${product.price}</p>
+                            <p>Cantidad: <input type="number" value="${product.quantity}" min="1" max="10" onchange="updateQuantity('${product.name}', this.value)" /></p>
+                        </div>
+                        <button class="remove-item" onclick="removeFromCart('${product.name}')">Eliminar</button>
+                    </div>
+                `;
+                cartItemsContainer.innerHTML += productHTML;
+            });
+
+            // Actualizar el número total de productos y el precio
+            totalProductsElement.textContent = cart.length;
+            totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
+        }
+
+        // Función para actualizar la cantidad de un producto
+        function updateQuantity(name, newQuantity) {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const product = cart.find(item => item.name === name);
+            if (product) {
+                product.quantity = parseInt(newQuantity);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                updateCart(); // Actualizar la vista
+            }
+        }
+
+        // Al cargar la página, mostrar los productos del carrito
+        document.addEventListener('DOMContentLoaded', updateCart);
+    </script>
+</body>
+</html>
